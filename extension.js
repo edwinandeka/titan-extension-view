@@ -75,6 +75,26 @@ Titan.modules.create({
 	});
 
 	context.subscriptions.push(disposable);
+
+	let disposableSTD = vscode.commands.registerCommand('titan.validate', function (fileUri) {
+		// The code you place here will be executed every time your command is executed
+		let titanjs = vscode.workspace.getConfiguration('titanjs')
+	
+		console.log('sTd is done!' + JSON.stringify(titanjs, null, 4));
+		console.log(fileUri);
+
+		let stdPath = titanjs.stdPath.replace(/[\\]/gmi, '/')
+		
+		const terminal = vscode.window.createTerminal('STD_testing');
+		terminal.sendText("echo 'Realizando pruebas de estandar de Frontend...'" +  fileUri.path.substring(1));
+		terminal.sendText(`node  ${stdPath}/CompilerValidator.js ` + fileUri.path.substring(1));
+		terminal.show(true)
+		
+		// 
+	});
+
+	context.subscriptions.push(disposableSTD);
+
 }
 
 // this method is called when your extension is deactivated

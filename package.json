@@ -2,7 +2,7 @@
 	"name": "titanjs",
 	"displayName": "Titan JS",
 	"description": "",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"author": {
 		"name": "Edwin Ramiro Ospina Ruiz",
 		"email": "edwinandeka@gmail.com",
@@ -15,7 +15,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:titan.createview"
+		"onCommand:titan.createview",
+		"onCommand:titan.validate"
 	],
 	"main": "./extension.js",
 	"contributes": {
@@ -23,13 +24,29 @@
 			{
 				"command": "titan.createview",
 				"title": "Titan - Create View"
+			},{
+				"command": "titan.validate",
+				"title": "Titan - STD testing"
 			}
 		],
 		"menus": {
 			"explorer/context": [{
 				"command": "titan.createview",
 				"group": "Titan"
+			},{
+				"command": "titan.validate",
+				"group": "Titan"
 			}]
+		},
+		"configuration": {
+			"title": "Titan JS",
+			"properties": {
+			  "titanjs.stdPath": {
+				"type": "string",
+				"default": null,
+				"description": "Specifies the folder path containing the STD testing files to use."
+			  }
+			}
 		}
 	},
 	"scripts": {
