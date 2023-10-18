@@ -16,7 +16,16 @@ For example if there is selected a subfolder under your modules folder you will 
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+
+### 0.0.3
+
+some problems with directory path was fixed 
+
+### 0.0.2
+
+Commands for run the STD testing were added.
+
+### 0.0.1
 
 Initial release of ...
 

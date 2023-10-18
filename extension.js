@@ -1,6 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
+const fs = require('fs');
+const path = require('path');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -9,45 +11,73 @@ const vscode = require('vscode');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+    // Use the console to output diagnostic information (console.log) and errors (console.error)
+    // This line of code will only be executed once when your extension is activated
+    console.log('Congratulations, your extension "titan" is now active!');
 
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with  registerCommand
+    // The commandId parameter must match the command field in package.json
+    let disposable = vscode.commands.registerCommand(
+        'titan.createview',
+        function (fileUri) {
+            // The code you place here will be executed every time your command is executed
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "titan" is now active!');
+            vscode.window
+                .showInputBox({
+                    title: 'Name',
+                    placeHolder: 'Name for view',
+                })
+                .then((nameview) => {
+                    const meses = [
+                        'ENE',
+                        'FEB',
+                        'MAR',
+                        'ABR',
+                        'MAY',
+                        'JUN',
+                        'JUL',
+                        'AGO',
+                        'SEP',
+                        'OCT',
+                        'NOV',
+                        'DIC',
+                    ];
+                    const fechaActual = new Date();
 
+                    const dia = fechaActual.getDate();
+                    const mes = fechaActual.getMonth(); // Los meses comienzan en 0, por lo que enero es 0, febrero es 1, etc.
+                    const ano = fechaActual.getFullYear();
 
+                    const fechaFormateada = `${dia} ${meses[mes]} ${ano}`;
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('titan.createview', function (fileUri) {
-		// The code you place here will be executed every time your command is executed
+                    const wsedit = new vscode.WorkspaceEdit();
+                    const wsPath =
+                        vscode.workspace.workspaceFolders[0].uri.fsPath; // gets the path of the first workspace folder
+                    nameview = nameview.toLowerCase().replace(/\s/gim, '_');
 
-		vscode.window.showInputBox({
-			title: 'Name',
-			placeHolder: 'Name for view'
-		}).then( nameview =>{
+                    const path = fileUri._fsPath.replace(/\\/gim, '/');
 
-			const wsedit = new vscode.WorkspaceEdit();
-			const wsPath = vscode.workspace.workspaceFolders[0].uri.fsPath; // gets the path of the first workspace folder
+                    let filePathHtml = path + `/${nameview}/${nameview}.html`;
+                    let filePathJS = path + `/${nameview}/${nameview}.js`;
+                    let filePathCss = path + `/${nameview}/${nameview}.css`;
 
-			nameview = nameview.toLowerCase().replace(/\s/gmi, '_')
+                    filePathHtml = filePathHtml
+                    filePathJS = filePathJS
+                    filePathCss = filePathCss
+                    debugger;
 
-			const filePathHtml = vscode.Uri.file(fileUri._fsPath + `/${nameview}/${nameview}.html`);
-			const filePathJS = vscode.Uri.file(fileUri._fsPath + `/${nameview}/${nameview}.js`);
-			const filePathCss = vscode.Uri.file(fileUri._fsPath + `/${nameview}/${nameview}.css`);
-			wsedit.createFile(filePathHtml, { ignoreIfExists: false });
-			wsedit.createFile(filePathJS, { ignoreIfExists: false });
-			wsedit.createFile(filePathCss, { ignoreIfExists: false });
-			let capitalize = (x)=>{
-				return x.charAt(0).toUpperCase() + x.slice(1).toLowerCase();
-			}
+                    let capitalize = (x) => {
+                        return (
+                            x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()
+                        );
+                    };
 
-			wsedit.insert(filePathJS, new vscode.Position(0, 0),  `
+                    const template = `
 /*
 * @module  ${capitalize(nameview)} - [Descripción de la vista]
-*
-* @author [correo] ([Nombre Completo])
+* @created on ${fechaFormateada}
+* @author [${vscode.env.email || 'ingrese el correo'}] (${vscode.env.userName})
 *
 * @license Derechos Reservados de Autor (C) DOWESOFT (dowesoft.com)
 */
@@ -63,44 +93,68 @@ Titan.modules.create({
 	},
 
 });	
-								`);
-				vscode.workspace.applyEdit(wsedit);
-				vscode.window.showInformationMessage('Created a new view: ' + nameview);
+`;
+                    // create folder
+                    fs.mkdirSync(path + '/' + nameview);
 
+                    // create  needed files
+                    fs.writeFileSync(filePathHtml, `<h1>${nameview}!</h1>`, {
+                        encoding: 'utf-8',
+                    });
 
-		})
+                    fs.writeFileSync(filePathCss, '', {
+                        encoding: 'utf-8',
+                    });
 
-		// Display a message box to the user
-		// 
-	});
+                    fs.writeFileSync(filePathJS, template, {
+                        encoding: 'utf-8',
+                    });
 
-	context.subscriptions.push(disposable);
+                    vscode.window.showInformationMessage(
+                        'Created a new view: ' + nameview
+                    );
+                });
 
-	let disposableSTD = vscode.commands.registerCommand('titan.validate', function (fileUri) {
-		// The code you place here will be executed every time your command is executed
-		let titanjs = vscode.workspace.getConfiguration('titanjs')
-	
-		console.log('sTd is done!' + JSON.stringify(titanjs, null, 4));
-		console.log(fileUri);
+            // Display a message box to the user
+            //
+        }
+    );
 
-		let stdPath = titanjs.stdPath.replace(/[\\]/gmi, '/')
-		
-		const terminal = vscode.window.createTerminal('STD_testing');
-		terminal.sendText("echo 'Realizando pruebas de estandar de Frontend...'" +  fileUri.path.substring(1));
-		terminal.sendText(`node  ${stdPath}/CompilerValidator.js ` + fileUri.path.substring(1));
-		terminal.show(true)
-		
-		// 
-	});
+    context.subscriptions.push(disposable);
 
-	context.subscriptions.push(disposableSTD);
+    let disposableSTD = vscode.commands.registerCommand(
+        'titan.validate',
+        function (fileUri) {
+            // The code you place here will be executed every time your command is executed
+            let titanjs = vscode.workspace.getConfiguration('titanjs');
 
+            console.log('sTd is done!' + JSON.stringify(titanjs, null, 4));
+            console.log(fileUri);
+
+            let stdPath = titanjs.stdPath.replace(/[\\]/gim, '/');
+
+            const terminal = vscode.window.createTerminal('STD_testing');
+            terminal.sendText(
+                "echo 'Realizando pruebas de estandar de Frontend...'" +
+                    fileUri.path.substring(1)
+            );
+            terminal.sendText(
+                `node  ${stdPath}/CompilerValidator.js ` +
+                    fileUri.path.substring(1)
+            );
+            terminal.show(true);
+
+            //
+        }
+    );
+
+    context.subscriptions.push(disposableSTD);
 }
 
 // this method is called when your extension is deactivated
 function deactivate() {}
 
 module.exports = {
-	activate,
-	deactivate
-}
+    activate,
+    deactivate,
+};
